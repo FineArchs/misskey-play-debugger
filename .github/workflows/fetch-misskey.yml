@@ -17,6 +17,7 @@ jobs:
       - name: Fetch
         run: |
           sh fetchMisskey.sh
+
       - name: Branch name
         id: git-branch-name
         uses: EthanSK/git-branch-name-action@v1
@@ -32,6 +33,11 @@ jobs:
           git add src/misskey/packages
           git commit -m'fetch misskey'
           git push -f -u origin fetch
+
+      - name: Create Pull Request
+        continue-on-error: true
+        run: |
+          gh pr create --fill -B "${GIT_BRANCH_NAME}"
 
       - name: Create fetch-locales branch
         run: |
