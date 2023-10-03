@@ -1,44 +1,61 @@
+<!--
+SPDX-FileCopyrightText: syuilo and other misskey contributors
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+
 <template>
-<div ref="rootEl" :class="[$style.root, { [$style.opened]: opened.value }]">
-	<div :class="$style.header" class="_button" @click="toggle">
-		<span :class="$style.headerIcon"><slot name="icon"></slot></span>
-		<span :class="$style.headerText"><slot name="label"></slot></span>
-		<span :class="$style.headerRight">
-			<span :class="$style.headerRightText"><slot name="suffix"></slot></span>
-			<i v-if="opened" class="ti ti-chevron-up icon"></i>
-			<i v-else class="ti ti-chevron-down icon"></i>
-		</span>
-	</div>
-	<div v-if="openedAtLeastOnce" :class="[$style.body, { [$style.bgSame]: bgSame.value }]" :style="{ maxHeight: maxHeight ? `${maxHeight}px` : null }">
-		<Transition
-			:enter-active-class="$store.state.animation ? $style.transition_toggle_enterActive : ''"
-			:leave-active-class="$store.state.animation ? $style.transition_toggle_leaveActive : ''"
-			:enter-from-class="$store.state.animation ? $style.transition_toggle_enterFrom : ''"
-			:leave-to-class="$store.state.animation ? $style.transition_toggle_leaveTo : ''"
-			@enter="enter"
-			@after-enter="afterEnter"
-			@leave="leave"
-			@after-leave="afterLeave"
-		>
-			<KeepAlive>
-				<div v-show="opened.value">
-					<MkSpacer :margin-min="14" :margin-max="22">
-						<slot></slot>
-					</MkSpacer>
+<div ref="rootEl" :class="$style.root" role="group" :aria-expanded="opened">
+	<MkStickyContainer>
+		<template #header>
+			<div :class="[$style.header, { [$style.opened]: opened }]" class="_button" role="button" data-cy-folder-header @click="toggle">
+				<div :class="$style.headerIcon"><slot name="icon"></slot></div>
+				<div :class="$style.headerText">
+					<div>
+						<MkCondensedLine :minScale="2 / 3"><slot name="label"></slot></MkCondensedLine>
+					</div>
+					<div :class="$style.headerTextSub">
+						<slot name="caption"></slot>
+					</div>
 				</div>
-			</KeepAlive>
-		</Transition>
-	</div>
+				<div :class="$style.headerRight">
+					<span :class="$style.headerRightText"><slot name="suffix"></slot></span>
+					<i v-if="opened" class="ti ti-chevron-up icon"></i>
+					<i v-else class="ti ti-chevron-down icon"></i>
+				</div>
+			</div>
+		</template>
+
+		<div v-if="openedAtLeastOnce" :class="[$style.body, { [$style.bgSame]: bgSame }]" :style="{ maxHeight: maxHeight ? `${maxHeight}px` : null, overflow: maxHeight ? `auto` : null }" :aria-hidden="!opened">
+			<Transition
+				:enterActiveClass="defaultStore.state.animation ? $style.transition_toggle_enterActive : ''"
+				:leaveActiveClass="defaultStore.state.animation ? $style.transition_toggle_leaveActive : ''"
+				:enterFromClass="defaultStore.state.animation ? $style.transition_toggle_enterFrom : ''"
+				:leaveToClass="defaultStore.state.animation ? $style.transition_toggle_leaveTo : ''"
+				@enter="enter"
+				@afterEnter="afterEnter"
+				@leave="leave"
+				@afterLeave="afterLeave"
+			>
+				<KeepAlive>
+					<div v-show="opened">
+						<MkSpacer :marginMin="14" :marginMax="22">
+							<slot></slot>
+						</MkSpacer>
+					</div>
+				</KeepAlive>
+			</Transition>
+		</div>
+	</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from 'vue';
-import MkSpacer from './MkSpacer.vue';
+import { nextTick, onMounted } from 'vue';
+import { defaultStore } from '@/store.js';
 
 const props = withDefaults(defineProps<{
-	defaultOpen: boolean;
-	maxHeight: number | null;
+	defaultOpen?: boolean;
+	maxHeight?: number | null;
 }>(), {
 	defaultOpen: false,
 	maxHeight: null,
@@ -53,10 +70,10 @@ const getBgColor = (el: HTMLElement) => {
 	}
 };
 
-let rootEl = ref<HTMLElement>();
-let bgSame = ref(false);
-let opened = ref(props.defaultOpen);
-let openedAtLeastOnce = ref(props.defaultOpen);
+let rootEl = $shallowRef<HTMLElement>();
+let bgSame = $ref(false);
+let opened = $ref(props.defaultOpen);
+let openedAtLeastOnce = $ref(props.defaultOpen);
 
 function enter(el) {
 	const elementHeight = el.getBoundingClientRect().height;
@@ -81,20 +98,20 @@ function afterLeave(el) {
 }
 
 function toggle() {
-	if (!opened.value) {
-		openedAtLeastOnce.value = true;
+	if (!opened) {
+		openedAtLeastOnce = true;
 	}
 
 	nextTick(() => {
-		opened.value = !opened.value;
+		opened = !opened;
 	});
 }
 
 onMounted(() => {
 	const computedStyle = getComputedStyle(document.documentElement);
-	const parentBg = getBgColor(rootEl.value.parentElement);
+	const parentBg = getBgColor(rootEl.parentElement);
 	const myBg = computedStyle.getPropertyValue('--panel');
-	bgSame.value = parentBg === myBg;
+	bgSame = parentBg === myBg;
 });
 </script>
 
@@ -111,12 +128,6 @@ onMounted(() => {
 
 .root {
 	display: block;
-
-	&.opened {
-		> .header {
-			border-radius: 6px 6px 0 0;
-		}
-	}
 }
 
 .header {
@@ -126,6 +137,8 @@ onMounted(() => {
 	box-sizing: border-box;
 	padding: 9px 12px 9px 12px;
 	background: var(--buttonBg);
+	-webkit-backdrop-filter: var(--blur, blur(15px));
+	backdrop-filter: var(--blur, blur(15px));
 	border-radius: 6px;
 	transition: border-radius 0.3s;
 
@@ -138,6 +151,21 @@ onMounted(() => {
 		color: var(--accent);
 		background: var(--buttonHoverBg);
 	}
+
+	&.opened {
+		border-radius: 6px 6px 0 0;
+	}
+}
+
+.headerUpper {
+	display: flex;
+	align-items: center;
+}
+
+.headerLower {
+	color: var(--fgTransparentWeak);
+	font-size: .85em;
+	padding-left: 4px;
 }
 
 .headerIcon {
@@ -162,9 +190,14 @@ onMounted(() => {
 	padding-right: 12px;
 }
 
+.headerTextSub {
+	color: var(--fgTransparentWeak);
+	font-size: .85em;
+}
+
 .headerRight {
 	margin-left: auto;
-	opacity: 0.7;
+	color: var(--fgTransparentWeak);
 	white-space: nowrap;
 }
 
@@ -176,7 +209,6 @@ onMounted(() => {
 	background: var(--panel);
 	border-radius: 0 0 6px 6px;
 	container-type: inline-size;
-	overflow: auto;
 
 	&.bgSame {
 		background: var(--bg);

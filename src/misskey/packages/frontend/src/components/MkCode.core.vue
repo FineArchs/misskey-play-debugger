@@ -1,6 +1,11 @@
+<!--
+SPDX-FileCopyrightText: syuilo and other misskey contributors
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+
 <!-- eslint-disable vue/no-v-html -->
 <template>
-<code v-if="inline" :class="`language-${prismLang}`" v-html="html"></code>
+<code v-if="inline" :class="`language-${prismLang}`" style="overflow-wrap: anywhere;" v-html="html"></code>
 <pre v-else :class="`language-${prismLang}`"><code :class="`language-${prismLang}`" v-html="html"></code></pre>
 </template>
 

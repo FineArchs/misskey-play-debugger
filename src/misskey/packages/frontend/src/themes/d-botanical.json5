@@ -1,26 +1,26 @@
 {
-	id: '8050783a-7f63-445a-b270-36d0f6ba1677',
+	id: '504debaf-4912-6a4c-5059-1db08a76b737',
 
-	name: 'Mi Dark',
+	name: 'Mi Botanical Dark',
 	author: 'syuilo',
-	desc: 'Default light theme',
 
 	base: 'dark',
 
 	props: {
-		bg: '#232323',
-		fg: 'rgb(199, 209, 216)',
+		accent: 'rgb(148, 179, 0)',
+		bg: 'rgb(37, 38, 36)',
+		fg: 'rgb(216, 212, 199)',
 		fgHighlighted: '#fff',
 		fgOnWhite: '@accent',
 		divider: 'rgba(255, 255, 255, 0.14)',
-		panel: '#2d2d2d',
+		panel: 'rgb(47, 47, 44)',
 		panelHeaderDivider: 'rgba(0, 0, 0, 0)',
 		header: ':alpha<0.7<@panel',
 		navBg: '#363636',
 		renote: '@accent',
-		mention: '#da6d35',
-		mentionMe: '#d44c4c',
-		hashtag: '#4cb8d4',
+		mention: 'rgb(212, 153, 76)',
+		mentionMe: 'rgb(212, 210, 76)',
+		hashtag: '#5bcbb0',
 		link: '@accent',
 	},
 }

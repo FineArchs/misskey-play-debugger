@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: syuilo and other misskey contributors
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+
 <template>
 <XCode :code="code" :lang="lang" :inline="inline"/>
 </template>
@@ -11,5 +16,5 @@ defineProps<{
 	inline?: boolean;
 }>();
 
-const XCode = defineAsyncComponent(() => import('./MkCode.core.vue'));
+const XCode = defineAsyncComponent(() => import('@/components/MkCode.core.vue'));
 </script>
